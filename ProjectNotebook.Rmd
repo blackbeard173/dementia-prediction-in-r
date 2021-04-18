@@ -1,0 +1,46 @@
+---
+title: "Dementia Prediction R Notebook"
+output: html_notebook
+---
+
+#### [**Loading Datasets**]{.ul}
+
+```{r}
+# oasisCross <- read.csv("oasis_cross-sectional.csv")
+oasisLong <- read.csv("oasis_longitudinal.csv")
+print(head(oasisLong))
+```
+
+```{r}
+# metadata ----
+
+# 1) Subject ID - ID of the individual subject
+# 2) MRI ID - ID of the MRI scan
+# 3) Group - Demented / Non Demented i.e. variable to be predicted
+# 4) Visit - Count of visit of the subject
+# 5) MR Delay - Instrument error
+# 6) M/F - Gender
+# 7) Hand - Dominant Hand
+# 8) Age - Age of Subject
+# 9) EDUC - Educational level of subject [years of education]
+# 10) SES - Socio Economic Status
+# 11) MMSE - Mini Mental State Exam - An all round test of the brain which can yield a max score of 30 being the healthiest 
+# 12) CDR - Clinical Dementia Rating
+# 13) eTIV - Estimated Total IntraCranial Volume
+# 14) nWBV - Normalized Whole Brain Volume
+# 15) ASF - Atlas Scaling Factor
+```
+
+#### [**Data Cleaning**]{.ul}
+
+```{r}
+print("\n Data Types of Columns")
+str(oasisLong)
+```
+```{r}
+nrow(oasisLong)
+ncol(oasisLong)
+dim(oasisLong)
+length(oasisLong)
+```
+
