@@ -6,8 +6,7 @@ output: html_notebook
 #### [**Loading Datasets**]{.ul}
 
 ```{r}
-# oasisCross <- read.csv("oasis_cross-sectional.csv")
-oasisLong <- read.csv("oasis_longitudinal.csv")
+oasisLong = read.csv("oasis_longitudinal.csv")
 print(head(oasisLong))
 ```
 
@@ -24,7 +23,7 @@ print(head(oasisLong))
 # 8) Age - Age of Subject
 # 9) EDUC - Educational level of subject [years of education]
 # 10) SES - Socio Economic Status
-# 11) MMSE - Mini Mental State Exam - An all round test of the brain which can yield a max score of 30 being the healthiest 
+# 11) MMSE - Mini Mental State Exam - An all round test of the brain which can yield a max score of 30 being the healthiest
 # 12) CDR - Clinical Dementia Rating
 # 13) eTIV - Estimated Total IntraCranial Volume
 # 14) nWBV - Normalized Whole Brain Volume
@@ -37,10 +36,104 @@ print(head(oasisLong))
 print("\n Data Types of Columns")
 str(oasisLong)
 ```
+
 ```{r}
 nrow(oasisLong)
 ncol(oasisLong)
+# Dimensions of dataset
 dim(oasisLong)
-length(oasisLong)
+```
+
+```{r}
+cat("Null values in each column:\n")
+sum(is.na(oasisLong$Subject.ID))
+sum(is.na(oasisLong$MRI.ID))
+sum(is.na(oasisLong$Group))
+sum(is.na(oasisLong$Visit))
+sum(is.na(oasisLong$MR.Delay))
+sum(is.na(oasisLong$M.F))
+sum(is.na(oasisLong$Hand))
+sum(is.na(oasisLong$Age))
+sum(is.na(oasisLong$EDUC))
+sum(is.na(oasisLong$SES))
+sum(is.na(oasisLong$MMSE))
+sum(is.na(oasisLong$CDR))
+sum(is.na(oasisLong$eTIV))
+sum(is.na(oasisLong$nWBV))
+sum(is.na(oasisLong$ASF))
+
+```
+
+```{r}
+summary(oasisLong)
+```
+
+```{r}
+oasisLong$Visit = as.factor(oasisLong$Visit)
+oasisLong$Group = as.factor(oasisLong$Group)
+oasisLong$M.F = as.factor(oasisLong$M.F)
+oasisLong$Hand = as.factor(oasisLong$Hand)
+summary(oasisLong)
+```
+
+```{r}
+# Replacing NA values by median values
+oasisLong$SES[is.na(oasisLong$SES)] = median(oasisLong$SES, na.rm = TRUE)
+oasisLong$MMSE[is.na(oasisLong$MMSE)] = median(oasisLong$MMSE, na.rm = TRUE)
+```
+
+```{r}
+# Check
+sum(is.na(oasisLong$SES))
+sum(is.na(oasisLong$MMSE))
+```
+
+```{r}
+#View(oasisLong)
+```
+
+```{r}
+colnames(oasisLong)
+colnames(oasisLong)[colnames(oasisLong) == "M.F"] = "Gender"
+colnames(oasisLong)
+```
+
+```{r}
+summary(oasisLong)
+```
+
+--------------------------------------------------------------------------------
+
+#### [**Data Visualization**]{.ul}
+
+```{r}
+dv = oasisLong
+head(dv)
+
+```
+
+```{r}
+# Total numbers of Males and Females
+males_total = length(dv$Gender[dv$Gender == "M"])
+males_total
+females_total = length(dv$Gender[dv$Gender == "F"])
+females_total
+
+```
+
+```{r}
+tot = c(males_total,females_total)
+tot
+
+```
+
+```{r}
+males_demented = length(dv[(dv$Gender[dv$Gender == "M"]) &&
+                               (dv$Group[dv$Group != "Nondemented"])])
+```
+
+
+```{r}
+dem=c(males_demented,females_demented)
 ```
 
