@@ -6,6 +6,7 @@ output: html_notebook
 #### [**Loading Datasets**]{.ul}
 
 ```{r}
+# REFACTOR oasislong
 oasisLong = read.csv("oasis_longitudinal.csv")
 print(head(oasisLong))
 ```
@@ -42,9 +43,12 @@ nrow(oasisLong)
 ncol(oasisLong)
 # Dimensions of dataset
 dim(oasisLong)
+
+unique(oasisLong$Hand)
 ```
 
 ```{r}
+# REFACTOR
 cat("Null values in each column:\n")
 sum(is.na(oasisLong$Subject.ID))
 sum(is.na(oasisLong$MRI.ID))
@@ -69,10 +73,10 @@ summary(oasisLong)
 ```
 
 ```{r}
-oasisLong$Visit = as.factor(oasisLong$Visit)
-oasisLong$Group = as.factor(oasisLong$Group)
-oasisLong$M.F = as.factor(oasisLong$M.F)
-oasisLong$Hand = as.factor(oasisLong$Hand)
+# oasisLong$Visit = as.factor(oasisLong$Visit)
+# oasisLong$Group = as.factor(oasisLong$Group)
+# oasisLong$M.F = as.factor(oasisLong$M.F)
+# oasisLong$Hand = as.factor(oasisLong$Hand)
 summary(oasisLong)
 ```
 
@@ -113,8 +117,13 @@ head(dv)
 ```
 
 ```{r}
+unique(dv$Gender)
+```
+
+
+```{r}
 # Total numbers of Males and Females
-males_total = length(dv$Gender[dv$Gender == "M"])
+males_total = length(dv$Group[dv$Gender == "M"])
 males_total
 females_total = length(dv$Gender[dv$Gender == "F"])
 females_total
@@ -128,12 +137,335 @@ tot
 ```
 
 ```{r}
-males_demented = length(dv[(dv$Gender[dv$Gender == "M"]) &&
-                               (dv$Group[dv$Group != "Nondemented"])])
+males_demented=length(dv$Group[(dv$Gender == "M") & (dv$Group != "Nondemented")])
+females_demented=length(dv$Group[(dv$Gender == "F") & (dv$Group != "Nondemented")])
 ```
 
 
 ```{r}
 dem=c(males_demented,females_demented)
+dem
+```
+
+
+```{r}
+# mydata <-
+#     data.frame(
+#         Male = c(males_total, males_demented),
+#         Female = c(females_total, females_demented)
+#     )
+# barplot(
+#     as.matrix(mydata),
+#     main = "Interesting",
+#     ylab = "Total",
+#     beside = TRUE,
+#     col = terrain.colors(2)
+# )
+# legend(5.3,
+#        200,
+#        c("Total", "Demented"),
+#        cex = 0.7,
+#        fill = terrain.colors(2))
+```
+
+```{r}
+library(reshape)
+library(ggplot2)
+Names = c("Male", "Female")     # create list of names
+data = data.frame(cbind(Total=males_total, Demented=males_demented), Names)
+
+#jugaad
+data[2, 1] = females_total
+data[2, 2] = females_demented# combine them into a data frame
+
+# melt the data frame for plotting
+data.m <- melt(data)
+
+# plot everything
+ggplot(data.m, aes(Names, value)) +
+    geom_bar(aes(fill = variable), position = "dodge", stat = "identity") +
+    theme(plot.title = element_text(hjust = 0.5) ,
+          panel.background = element_rect(fill = "black")) + ggtitle("Gender VS Dementia") + labs(y = "Number of Subjects", x = "Gender")
+```
+
+```{r}
+ses_cat = unique(dv$SES)
+ses_cat
+
+
+ses_cat = sort(ses_cat)
+ses_cat
+
+```
+
+```{r}
+# NEEDS TO BE REFACTORED
+
+ses_1 = length(dv$Group[(dv$SES == '1') & (dv$Group != "Nondemented")])
+ses_2 = length(dv$Group[(dv$SES == '2') & (dv$Group != "Nondemented")])
+ses_3 = length(dv$Group[(dv$SES == '3') & (dv$Group != "Nondemented")])
+ses_4 = length(dv$Group[(dv$SES == '4') & (dv$Group != "Nondemented")])
+ses_5 = length(dv$Group[(dv$SES == '5') & (dv$Group != "Nondemented")])
+```
+
+
+```{r}
+ses_dem=c(ses_1,ses_2,ses_3,ses_4,ses_5)
+ses_dem
+```
+
+```{r}
+
+ses_df = data.frame(
+    ses_graph = c('Very High SES' , 'High SES' , 'Average SES' , 'Low SES' , 'Very Low SES'),
+    ses_dem_graph = ses_dem
+)
+ses_df$ses_graph <-
+    factor(
+        ses_df$ses_graph,
+        levels = c('Very High SES' , 'High SES' , 'Average SES' , 'Low SES' , 'Very Low SES')
+    )
+p = ggplot(ses_df, aes(x = ses_graph, y = ses_dem_graph)) + geom_bar(
+    stat = "identity",
+    fill = c(
+        "deepskyblue4",
+        "deeppink3",
+        "darkgoldenrod2",
+        "darkorchid",
+        "chartreuse3"
+    )
+) + theme(plot.title = element_text(hjust = 0.5) ,
+          panel.background = element_rect(fill = "black"))
+p = p + ggtitle("SocioEconomic Status VS Dementia") + labs(y = "Number of Demented Subjects", x = "SocioEconomic Status")
+p
+
+```
+
+```{r}
+
+age = oasisLong['Age']
+age
+
+```
+
+```{r}
+
+norm_brain = oasisLong['nWBV']
+norm_brain
+norm_brain = norm_brain * 1000
+norm_brain
+```
+
+```{r}
+# ERROR
+# s_plot_data = data.frame(age, norm_brain)
+# s_plot_data$Age <- unlist(s_plot_data$Age)
+# s_plot_data$nWBV <- unlist(s_plot_data$nWBV)
+# s_plot = ggplot(s_plot_data, aes(x = age, y = norm_brain)) +
+#     geom_point()
+# s_plot
+# s_plot=plot(
+#     x =oasisLong['Age'],
+#     y = oasisLong['nWBV'],
+#     xlab = "Age",
+#     ylab = "Whole Brain Volume",
+#     main = "Age VS Whole Brain Volume",
+#     xlim = NULL,
+#     ylim = NULL,
+# )
+
+s_plot <- ggplot(oasisLong, aes(x = Age, y = nWBV)) +
+    geom_point(size = 3 ,  color='green')+ theme(plot.title = element_text(hjust = 0.5) ,
+                         panel.background = element_rect(fill = "black")) +
+    ggtitle("Age VS Whole Brain Volume") + labs(y = "Whole Brain Volume [mL]", x = "Age")
+s_plot
+```
+
+```{r}
+
+cdr=unique(oasisLong$CDR)
+cdr
+
+```
+
+```{r}
+
+# REFACTOR
+# cdr_dem = NULL
+# cdr_tot = NULL
+# i = NULL
+# for (i in cdr) {
+#     append(cdr_dem, length(oasisLong$CDR[(oasisLong['CDR'] == i)  &
+#                                              (oasisLong['Group'] != 'Nondemented')]))
+#     append(cdr_tot, length(oasisLong$CDR[oasisLong['CDR'] == i]))
+# }
+# 
+# cdr_dem
+# cdr_tot
+
+cdr_1 = length(oasisLong$CDR[(oasisLong$CDR == 0)  &
+                                 (oasisLong$Group != 'Nondemented')])
+cdr_2 = length(oasisLong$CDR[(oasisLong$CDR == 0.5)  &
+                                 (oasisLong$Group != 'Nondemented')])
+cdr_3 = length(oasisLong$CDR[(oasisLong$CDR == 1)  &
+                                 (oasisLong$Group != 'Nondemented')])
+cdr_4 = length(oasisLong$CDR[(oasisLong$CDR == 2)  &
+                                 (oasisLong$Group != 'Nondemented')])
+cdr_dem = c(cdr_1, cdr_2, cdr_3, cdr_4)
+
+cdr_dem
+
+cdr_tot_1 = length(oasisLong$CDR[oasisLong$CDR == 0])
+
+cdr_tot_2 = length(oasisLong$CDR[oasisLong$CDR == 0.5])
+
+cdr_tot_3 = length(oasisLong$CDR[oasisLong$CDR == 1])
+
+cdr_tot_4 = length(oasisLong$CDR[oasisLong$CDR == 2])
+cdr_tot = c(cdr_tot_1, cdr_tot_2, cdr_tot_3, cdr_tot_4)
+
+cdr_tot
+
+
+# cdr_tot
+
+```
+
+```{r}
+cdr_perc_1=(cdr_1/cdr_tot_1)*100
+cdr_perc_2=(cdr_2/cdr_tot_2)*100
+cdr_perc_3=(cdr_3/cdr_tot_3)*100
+cdr_perc_4=(cdr_4/cdr_tot_4)*100
+cdr_perc_1
+cdr_perc_2
+cdr_perc_3
+cdr_perc_4
+cdr_perc=c(cdr_perc_1,cdr_perc_2,cdr_perc_3,cdr_perc_4)
+cdr_perc
+```
+
+```{r}
+cdr_df = data.frame(
+   cdr_graph = c('None' , 'Very Mild' , 'Mild' , 'Moderate/Severe'),
+    cdr_perc_graph = cdr_perc
+)
+cdr_df$cdr_graph <-
+    factor(
+        cdr_df$cdr_graph,
+        levels = c('None' , 'Very Mild' , 'Mild' , 'Moderate/Severe')
+    )
+dd_plot= ggplot(cdr_df, aes(x = cdr_graph, y = cdr_perc_graph)) + geom_bar(
+    stat = "identity",
+    fill = c(
+        "deepskyblue4",
+        "deeppink3",
+        "darkgoldenrod2",
+        "chartreuse3"
+    )
+) + theme(plot.title = element_text(hjust = 0.5) ,
+          panel.background = element_rect(fill = "black"))
+dd_plot = dd_plot + ggtitle("Dementia dependence on CDR") + labs(y = "Percentage of Subjects with Dementia", x = "Clinical Dementia Rating")
+dd_plot
+
+```
+
+```{r}
+m_dem = oasisLong$Age[(oasisLong$Group != "Nondemented") &
+                          (oasisLong$Gender == "M")]
+m_dem
+f_dem = oasisLong$Age[(oasisLong$Group != "Nondemented") &
+                          (oasisLong$Gender == "F")]
+f_dem
+m_nondem = oasisLong$Age[(oasisLong$Group == "Nondemented") &
+                             (oasisLong$Gender == "M")]
+m_nondem
+f_nondem = oasisLong$Age[(oasisLong$Group == "Nondemented") &
+                             (oasisLong$Gender == "M")]
+f_nondem
+```
+
+```{r}
+
+# type_dem=c("m_dem" , "f_dem" , "m_nondem" , "f_nondem")
+# type_dem
+# b_plot = ggplot(iris , aes(Sepal.Length , Species , col = Species)) + geom_boxplot()  
+# b_plot
+
+```
+
+```{r}
+type = "Demented males"
+age = m_dem
+
+box_data = data.frame(age, type)
+
+type = "Demented females"
+age = f_dem
+box_data_1 = data.frame(age, type)
+
+type = "Nondemented males"
+age = m_nondem
+box_data_2 = data.frame(age, type)
+
+type = "Nondemented females"
+age = f_nondem
+box_data_3 = data.frame(age, type)
+
+box_plot_data = rbind(box_data, box_data_1, box_data_2, box_data_3)
+box_plot_data
+
+```
+
+
+```{r}
+bx_plot = ggplot(box_plot_data , aes(age , type , fill = type)) + geom_boxplot(
+    outlier.colour = "red" ,
+    outlier.size = 3 ,
+    outlier.shape = 4
+) + coord_flip() + labs(title = "Age Comparision" , x = "Years", y = "Type")
+bx_plot
+```
+
+
+
+
+
+#### [**Analysis**]{.ul}
+
+#### [**Data Preprocessing**]{.ul}
+
+```{r}
+library(superml)
+
+unique(oasisLong$Hand)
+
+# Since we only have one categorical variable we will drop the column.
+
+# label <- LabelEncoder$new()
+# oasisLong$Hand = label$fit_transform(oasisLong$Hand)
+# oasisLong$Hand
+
+# oasisLong = subset(oasisLong, select = - c(Hand) )
+oasisLong
+```
+
+
+
+```{r}
+unique(oasisLong$Gender)
+
+label <- LabelEncoder$new()
+oasisLong$Gender = label$fit_transform(oasisLong$Gender)
+
+```
+
+```{r}
+# Dropping columns containing irrelevent data
+oasisLong = subset(oasisLong, select = -c(Subject.ID, MRI.ID, Visit, MR.Delay))
+
+```
+## [**Correlation Mapping for Feature Removal**]{.ul}
+```{r}
+
 ```
 
