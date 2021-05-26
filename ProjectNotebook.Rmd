@@ -475,6 +475,8 @@ unique(oasisLong$Group)
 ```
 
 ```{r}
+# oasisLong$Group = as.factor(oasisLong$Group)
+# oasisLong$Group=as.numeric(oasisLong$Group)
 oasisLong$Group = label$fit_transform(oasisLong$Group)
 
 unique(oasisLong$Group)
@@ -556,6 +558,96 @@ corrheatmap
 ```{r}
 
 oasisLong = subset(oasisLong, select = -c(CDR,eTIV))
+
+```
+
+## Data Normalization
+
+```{r}
+oasisLong['Age'] = oasisLong['Age'] / max(oasisLong$Age)
+oasisLong['EDUC'] = oasisLong['EDUC'] / max(oasisLong$EDUC)
+oasisLong['MMSE'] = oasisLong['MMSE'] / 30
+oasisLong['ASF'] = oasisLong['ASF'] / max(oasisLong$ASF)
+
+```
+
+
+ML Models
+
+Train Test Split
+
+```{r}
+library(Metrics)
+library(creditmodel)
+
+train_test = train_test_split(
+    oasisLong,
+    split_type = "Random",
+    prop = 0.7,
+    # occur_time = "issue_d",
+    seed = 12,
+    save_data = FALSE
+)
+dat_train = train_test$train
+dat_test = train_test$test
+```
+
+```{r}
+
+nrow(dat_train)
+nrow(dat_test)
+
+
+```
+
+## Decision Tree
+```{r}
+library(rpart)
+# library(rpart.plot)
+dec_tree <- rpart(Group ~ ., data = dat_train, method = 'class')
+```
+
+
+
+```{r}
+# 0 = non
+# 1= dem
+
+predict_dec_tree <- predict(dec_tree, dat_test, type = 'class')
+
+# table_mat <- table(dat_test$Group, predict_dec_tree)
+# table_mat
+
+```
+
+```{r}
+
+measure_perf <- function(model_, predicted, actual) {
+    cat("\n\nAccuracy : ")
+    cat(accuracy(actual, predicted))
+    
+    predicted_ = list(predicted)
+    
+    
+    cat("\n\nRecall : ")
+    
+    cat(recall(actual, predicted_))
+    
+    cat("\n\n\nConfusion Matrix\n\n")
+    print(table(actual, predicted))
+}
+
+
+
+```
+
+```{r}
+
+measure_perf(dec_tree, predict_dec_tree, dat_test$Group)
+
+```
+
+```{r}
 
 ```
 
